@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WAI GAME System — Livro de Regras do Módulo Básico</title>
+<meta name="description" content="Livro de regras do motor universal WAI GAME System (Wide Adventure Interface).">
+<link rel="alternate" type="text/markdown" href="livro-regras-universal.md">
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--text:#e6edf3;--muted:#8b949e;--accent:#e3b341;--line:#30363d;--code:#1f242c}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
+a{color:var(--accent)}
+.layout{display:grid;grid-template-columns:290px 1fr;max-width:1200px;margin:0 auto}
+nav{position:sticky;top:0;height:100vh;overflow:auto;padding:24px 16px;border-right:1px solid var(--line);background:var(--panel)}
+nav .brand{font-weight:700;font-size:1.05rem}
+nav .sub{color:var(--muted);font-size:.78rem;margin:2px 0 16px}
+nav ul{list-style:none;margin:0;padding:0}
+nav ul ul{padding-left:14px}
+nav li{margin:2px 0}
+nav a{display:block;padding:3px 6px;border-radius:6px;color:var(--text);text-decoration:none;font-size:.87rem}
+nav a:hover{background:#21262d;color:var(--accent)}
+main{padding:40px 48px;min-width:0}
+article h1{font-size:2rem;margin-top:0}
+article h2{margin-top:2.2em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+article h3{margin-top:1.6em}
+code{background:var(--code);padding:.15em .4em;border-radius:5px;font-size:.9em}
+pre{background:var(--code);padding:16px;border-radius:10px;overflow:auto;border:1px solid var(--line)}
+pre code{background:none;padding:0}
+blockquote{margin:1.2em 0;padding:.6em 1em;border-left:3px solid var(--accent);background:var(--panel);border-radius:0 8px 8px 0;color:var(--muted)}
+blockquote strong{color:var(--text)}
+table{border-collapse:collapse;width:100%;margin:1.2em 0;font-size:.92rem;display:block;overflow:auto}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--panel)}
+hr{border:0;border-top:1px solid var(--line);margin:2.5em 0}
+@media(max-width:820px){.layout{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}main{padding:24px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+  <div class="brand">WAI GAME System</div>
+  <div class="sub">Wide Adventure Interface</div>
+  <ul><li><a href="#preambulo-por-que-separar">Preâmbulo — por que separar</a></li><li><a href="#1-entidades">1. Entidades</a></li><li><a href="#2-tracos">2. Traços</a></li><li><a href="#3-a-rolagem-de-duelo">3. A Rolagem de Duelo</a><ul><li><a href="#3-1-determinacao-do-resultado">3.1 Determinação do resultado</a></li></ul></li><li><a href="#4-faixas-de-desfecho">4. Faixas de Desfecho</a></li><li><a href="#5-modificadores-e-dificuldade">5. Modificadores e Dificuldade</a></li><li><a href="#6-vantagem-e-desvantagem">6. Vantagem e Desvantagem</a></li><li><a href="#7-reservas-pools">7. Reservas (Pools)</a></li><li><a href="#8-estados-e-substituicao">8. Estados e Substituição</a></li><li><a href="#9-itens">9. Itens</a></li><li><a href="#10-moeda">10. Moeda</a></li><li><a href="#11-modulos-do-basico-universal">11. Módulos do "Básico Universal"</a></li><li><a href="#12-o-que-a-skin-fornece">12. O que a skin fornece</a></li><li><a href="#13-sna-como-skin-n-1-mapeamento">13. SnA como skin nº 1 (mapeamento)</a></li><li><a href="#14-uma-skin-alternativa-teste-de-estanqueidade">14. Uma skin alternativa (teste de estanqueidade)</a></li><li><a href="#15-como-o-motor-le-a-skin">15. Como o motor lê a skin</a></li><li><a href="#16-regras-de-fronteira">16. Regras de fronteira</a></li><li><a href="#17-repositorio-e-empacotamento-wai-core">17. Repositório e empacotamento — wai-core</a></li><li><a href="#apendice-glossario-neutro">Apêndice — Glossário neutro</a></li><li><a href="#decisoes-fechadas">Decisões fechadas</a></li></ul>
+</nav>
+<main><article>
+<h1 id="wai-game-system-livro-de-regras-do-modulo-basico">WAI GAME System — Livro de Regras do Módulo Básico</h1>
+<blockquote><strong>WAI</strong> — <em>Wide Adventure Interface</em>. O motor universal de RPG.  <strong>Status:</strong> regras do módulo básico fechadas. Este documento descreve o <em>motor</em> — a camada de cálculos e regras — separado da <em>skin</em> (lore, nomes, imagens). Decisões tomadas aparecem como <strong>Decidido</strong>.</blockquote>
+<hr>
+<h2 id="preambulo-por-que-separar">Preâmbulo — por que separar</h2>
+<p>Hoje o Spaceships and Aliens é um sistema onde regra e universo estão entrelaçados: os androides têm <code>attack</code> e <code>intellect</code>, a Tiburon tem combustível, o drone tem CA 10. Se quisermos reusar o motor para fantasia, cyberpunk ou horror, temos que separar duas coisas que hoje vivem juntas:</p>
+<ul><li><strong>Motor (WAI)</strong> — resolve o que acontece. Dados, faixas de desfecho, recursos, desgaste, substituição. Não conhece "androide", "Tiburon" nem "esperança".</li><li><strong>Skin</strong> — diz o que as coisas <em>são</em>. Nomes, prosa, imagens, paleta, taxonomia do mundo. Não faz conta nenhuma.</li></ul>
+<p>O WAI é o mesmo jogo em qualquer universo. A skin é o verniz que o público enxerga. Trocar de skin não deve mexer em uma linha do motor.</p>
+<p><strong>Contrato de separação (a regra de ouro):</strong></p>
+<blockquote>O motor só conhece <em>entidades</em>, <em>traços</em>, <em>reservas</em>, <em>itens</em>, <em>moeda</em> e <em>dados</em>. Se um nome próprio, uma cor ou uma imagem aparece na lógica, algo vazou.</blockquote>
+<hr>
+<h1 id="parte-i-o-motor-wai">Parte I — O Motor (WAI)</h1>
+<h2 id="1-entidades">1. Entidades</h2>
+<p>O motor trabalha com um único tipo de objeto: a <strong>Entidade</strong>. Uma entidade é qualquer coisa que age — um personagem, um NPC, um veículo, uma criatura, uma torreta. O motor não distingue: todos têm os mesmos campos.</p>
+<table><thead><tr><th>Campo</th><th>Tipo</th><th>Papel</th></tr></thead><tbody><tr><td><code>id</code></td><td>string</td><td>Identificador estável</td></tr><tr><td><code>traits</code></td><td>mapa nome→número</td><td>Modificadores numéricos</td></tr><tr><td><code>defense</code></td><td>número</td><td>Dificuldade de ser atingido</td></tr><tr><td><code>ability</code></td><td><code>{ name, trait, value }</code></td><td>Traço especial com bônus próprio</td></tr><tr><td><code>pool</code></td><td><code>{ start, max, current }</code></td><td>Reserva de recurso</td></tr><tr><td><code>items</code></td><td>lista de Item</td><td>Equipamento carregado</td></tr><tr><td><code>state</code></td><td>enum</td><td><code>active</code> | <code>down</code> | <code>replaced</code></td></tr></tbody></table>
+<p><strong>Decidido:</strong> pool único, para simplicidade.</p>
+<h2 id="2-tracos">2. Traços</h2>
+<p>Traços são modificadores numéricos nomeados. O motor não sabe o que significam; só soma. A skin decide quais existem.</p>
+<ul><li>O SnA usa três: <strong>Ataque</strong>, <strong>Inteligência</strong>, <strong>Especialidade</strong> (a <code>ability</code>).</li><li>Uma skin de fantasia poderia usar <strong>Força</strong>, <strong>Astúcia</strong>, <strong>Arcano</strong>.</li><li>Uma skin de horror poderia usar <strong>Sangue-frio</strong>, <strong>Percepção</strong>, <strong>Vontade</strong>.</li></ul>
+<p>O motor só exige: <em>um traço é um número somado a uma rolagem quando a ficção pedir.</em> Quantos traços, e seus nomes, são escolha da skin.</p>
+<p><strong>Decidido:</strong> existe um traço padrão. Quando nenhum traço da skin se aplica — um teste fora do escopo do jogo — o mestre atribui um valor ao teste, e é esse número que entra como modificador. O motor não julga o valor dado.</p>
+<h2 id="3-a-rolagem-de-duelo">3. A Rolagem de Duelo</h2>
+<p>O coração do motor. Toda ação incerta é resolvida por <strong>dois dados de 12 faces opostos</strong> — não um dado de sucesso, mas uma <em>balança</em>.</p>
+<pre><code>Duelo = d12(A) + d12(B) + modificador ± d6(vantagem/desvantagem)</code></pre>
+<p>Onde <code>A</code> e <code>B</code> são as duas forças opostas da ficção. O SnA as chama de <strong>Esperança</strong> e <strong>Medo</strong>. Outra skin pode chamá-las de <strong>Luz/Sombra</strong>, <strong>Ordem/Caos</strong>, <strong>Corpo/Máquina</strong>. O motor só compara qual face saiu maior.</p>
+<blockquote><strong>Por que dois dados em vez de um?</strong> Um único d20 diz <em>se</em> deu certo. Dois dados opostos dizem <em>se</em> deu certo <strong>e a que custo</strong> — a mesma soma pode carregar sorte ou perigo. É o que dá textura narrativa sem o narrador inventar complicações do nada.</blockquote>
+<h3 id="3-1-determinacao-do-resultado">3.1 Determinação do resultado</h3>
+<ol><li>Role <code>d12(A)</code> e <code>d12(B)</code>.</li><li>Compare os dois <strong>entre si</strong> — isso define o <em>tom</em> (favorável ou adverso).</li><li>Some tudo com o modificador e o d6, se houver.</li><li>Compare a <strong>soma</strong> com a <strong>Dificuldade (DC)</strong> — isso define <em>sucesso ou falha</em>.</li><li>Cruze tom × sucesso para achar a <strong>faixa de desfecho</strong>.</li></ol>
+<h2 id="4-faixas-de-desfecho">4. Faixas de Desfecho</h2>
+<p>O cruzamento produz cinco faixas. Cada uma concede (ou não) uma unidade de recurso ao pool:</p>
+<table><thead><tr><th>Faixa</th><th>Condição</th><th>Sucesso?</th><th>Tom</th><th>Recurso</th></tr></thead><tbody><tr><td><strong>Crítico</strong></td><td>A = B</td><td>sim/falha <em>intensa</em></td><td>—</td><td>+1</td></tr><tr><td><strong>Triunfo</strong></td><td>A &gt; B e soma ≥ DC</td><td>sucesso</td><td>favorável</td><td>+1</td></tr><tr><td><strong>Abertura</strong></td><td>A &gt; B e soma &lt; DC</td><td>falha</td><td>favorável</td><td>+1</td></tr><tr><td><strong>Custo</strong></td><td>A &lt; B e soma ≥ DC</td><td>sucesso</td><td>adverso</td><td>0</td></tr><tr><td><strong>Revés</strong></td><td>A &lt; B e soma &lt; DC</td><td>falha</td><td>adverso</td><td>0</td></tr></tbody></table>
+<p><strong>A regra do recurso:</strong> <em>tom favorável sempre rende recurso, mesmo falhando.</em> A ideia é que sorte e infortúnio não dependem do sucesso da tarefa — você pode falhar a ação e ainda sair com uma abertura. É deliberado.</p>
+<p><strong>Decidido — Crítico:</strong> o empate concede <code>+1</code> ao pool; o peso narrativo (o "destino se manifesta") é <em>dificuldade narrativa</em> — interpretada pelo narrador e pela skin, sem efeito mecânico obrigatório no motor.</p>
+<p><strong>Decidido — Revés:</strong> o motor não cobra recurso. O agravamento da cena é <em>dificuldade narrativa</em>, a cargo do narrador.</p>
+<h2 id="5-modificadores-e-dificuldade">5. Modificadores e Dificuldade</h2>
+<ul><li><strong>Modificador:</strong> o número do traço relevante, escolhido pelo narrador antes da rolagem. O motor recebe um número; não valida a escolha.</li><li><strong>DC (Dificuldade):</strong> alvo fixo definido pela cena. O motor não sugere DCs — isso é ferramenta da skin (uma tabela de dificuldades por contexto).</li></ul>
+<p><strong>Decidido:</strong> a skin traz uma tabela canônica de DCs (ex.: Fácil 8 / Médio 12 / Difícil 16). O motor não a define, mas conta com ela para padronizar os testes.</p>
+<h2 id="6-vantagem-e-desvantagem">6. Vantagem e Desvantagem</h2>
+<p>Um dado extra de 6 faces inclina a soma, <strong>sem tocar o tom</strong>:</p>
+<table><thead><tr><th>Modo</th><th>Efeito</th></tr></thead><tbody><tr><td><strong>Vantagem</strong></td><td><code>+1d6</code> na soma</td></tr><tr><td><strong>Desvantagem</strong></td><td><code>−1d6</code> na soma</td></tr></tbody></table>
+<p>Regra crítica: <strong>os d6 nunca decidem o tom (A vs B)</strong>. Só os d12 decidem. Isso mantém o eixo narrativo (sorte/perigo) independente do eixo tático (bônus).</p>
+<h2 id="7-reservas-pools">7. Reservas (Pools)</h2>
+<p>Uma reserva é um recurso tático que sobe e desce. No SnA é a <strong>Energia</strong>; numa skin de horror poderia ser <strong>Sanidade</strong>; em fantasia, <strong>Mana</strong>.</p>
+<table><thead><tr><th>Operação</th><th>Gatilho</th></tr></thead><tbody><tr><td><code>+1</code></td><td>desfecho favorável (ver §4) ou habilidade</td></tr><tr><td><code>−1</code></td><td>gasto manual ou evento da ficção</td></tr><tr><td>teto</td><td><code>max</code> — nada passa disso</td></tr><tr><td>piso</td><td><code>0</code> — dispara o estado <code>down</code> (ver §8)</td></tr></tbody></table>
+<p><strong>Decidido:</strong> <code>max = 2 × start</code> é regra do motor — todo pool dobra, sem exceção de skin. A recuperação principal vem do <strong>desfecho favorável</strong> (§4): tom favorável rende <code>+1</code>, mesmo em falha. Ajuda externa (o mestre, um item, uma habilidade, um evento) também pode restaurar recurso.</p>
+<h2 id="8-estados-e-substituicao">8. Estados e Substituição</h2>
+<p>Uma entidade tem três estados, e eles não têm nada a ver com o universo da skin — só com a capacidade de agir:</p>
+<table><thead><tr><th>Estado</th><th>Significado</th><th>Recuperação</th></tr></thead><tbody><tr><td><code>active</code></td><td>Opera normalmente</td><td>—</td></tr><tr><td><code>down</code></td><td>Não pode agir, mas ainda existe (desligado, inconsciente, exausto)</td><td>volta a <code>active</code> quando recuperar</td></tr><tr><td><code>replaced</code></td><td>Terminado (morto, destruído, desligado permanentemente)</td><td>só volta se a lore permitir (reconstrução, ressurreição…)</td></tr></tbody></table>
+<p>O motor define as transições: ao zerar o pool, <code>active → down</code>. A passagem <code>down → replaced</code> é decisão da mesa (ou da lore), não automática. O <strong>substituto é outro personagem</strong>, escolhido pela skin — não um chassi genérico. Retornar de <code>replaced</code> é, por padrão, impossível; a skin pode abrir exceções narrativas.</p>
+<p><strong>Nota:</strong> o "Protocolo Drone" do SnA era um substituto genérico. Sob esta definição ele deixa de ser regra do motor — a skin SnA define que, ao ser <code>replaced</code>, o jogador assume outro androide do catálogo.</p>
+<h2 id="9-itens">9. Itens</h2>
+<p>Um Item tem nome, um dado de dano opcional e tags livres. O motor usa: <code>damage</code> (número), <code>dice</code> (ex.: <code>2d6</code>), bônus de traço, e <code>tags</code>.</p>
+<p><strong>Decidido:</strong> itens modificam traços, dependendo do tipo. Um item pode somar a um traço (ex.: <code>+1</code> em Ataque), carregar dano, ou ambos. O motor soma <code>traço + bônus de item</code> quando a ficção pedir.</p>
+<h2 id="10-moeda">10. Moeda</h2>
+<p>O motor define uma <strong>escala monetária de denominações fixas</strong>. Os valores são regra; os nomes são skin.</p>
+<pre><code>Base: 1 · 10 · 50 · 100 · 1.000 · 5.000 · 10.000</code></pre>
+<p>Sete degraus, cada um um múltiplo do primeiro. Uma skin nomeia cada degrau e decide o que cada faixa de preço compra. Exemplo:</p>
+<table><thead><tr><th>Valor</th><th>Nome (skin exemplo)</th></tr></thead><tbody><tr><td>1</td><td>Latão</td></tr><tr><td>10</td><td>Cobre</td></tr><tr><td>50</td><td>Bronze</td></tr><tr><td>100</td><td>Prata</td></tr><tr><td>1.000</td><td>Ouro</td></tr><tr><td>5.000</td><td>Platina</td></tr><tr><td>10.000</td><td>Diamante</td></tr></tbody></table>
+<p>Regras:</p>
+<ul><li>Preços e custos são sempre múltiplos ou somas dessas denominações.</li><li>O motor não converte entre skins — a escala é absoluta dentro de uma skin.</li><li>Entidades podem carregar saldo; itens e serviços têm preço.</li></ul>
+<p><strong>Decidido:</strong> crédito é <strong>separado</strong> do pool de recursos — não confundir os dois. O saldo é dinheiro puro, <strong>acumulativo</strong>, sem teto <code>2×</code> e sem piso <code>down</code>. O pool (§7) é autonomia tática; o crédito é riqueza.</p>
+<h2 id="11-modulos-do-basico-universal">11. Módulos do "Básico Universal"</h2>
+<p>O <strong>módulo básico</strong> é o mínimo para jogar: §1–§10. Tudo o mais é opcional e plugável, ativado pela skin:</p>
+<table><thead><tr><th>Módulo</th><th>O que adiciona</th><th>Estado</th></tr></thead><tbody><tr><td><strong>Básico</strong></td><td>Entidades, duelos, pools, itens, moeda</td><td>núcleo</td></tr><tr><td><strong>Substituição</strong></td><td>Estado <code>replaced</code> + entidade substituta</td><td>opcional</td></tr><tr><td><strong>Moeda</strong></td><td>Escala monetária + saldo + preços</td><td>opcional</td></tr><tr><td><strong>Progressão</strong></td><td>Entidades evoluem entre sessões</td><td>não existe hoje</td></tr><tr><td><strong>Facções</strong></td><td>Entidades com relações e moral</td><td>não existe hoje</td></tr></tbody></table>
+<hr>
+<h1 id="parte-ii-a-skin">Parte II — A Skin</h1>
+<h2 id="12-o-que-a-skin-fornece">12. O que a skin fornece</h2>
+<p>A skin é <strong>dado puro</strong>. Ela nunca calcula. Ela entrega:</p>
+<table><thead><tr><th>Elemento</th><th>Exemplo SnA</th></tr></thead><tbody><tr><td><strong>Nomes das forças opostas</strong></td><td>Esperança / Medo</td></tr><tr><td><strong>Nomes dos traços</strong></td><td>Ataque, Inteligência, Especialidade</td></tr><tr><td><strong>Roster de entidades</strong></td><td>os 10 androides (<code>data/robots.json</code>)</td></tr><tr><td><strong>Nomes dos recursos</strong></td><td>Energia / Células</td></tr><tr><td><strong>Nomes da moeda</strong></td><td>Latão → Diamante</td></tr><tr><td><strong>Taxonomia do mundo</strong></td><td>a árvore de lore (<code>data/lore/</code>)</td></tr><tr><td><strong>Prosa e imagens</strong></td><td><code>.md</code> + <code>.webp</code> por entrada</td></tr><tr><td><strong>Paleta e ícones</strong></td><td><code>sna.css</code> + <code>img/</code></td></tr><tr><td><strong>Prompts de IA</strong></td><td><code>prompts/*.js</code> (flavor, não regra)</td></tr></tbody></table>
+<h2 id="13-sna-como-skin-n-1-mapeamento">13. SnA como skin nº 1 (mapeamento)</h2>
+<table><thead><tr><th>Motor</th><th>Skin SnA</th></tr></thead><tbody><tr><td>Entidade</td><td>Androide / PNJ / Nave</td></tr><tr><td><code>traits.attack</code></td><td>Mod. Ataque</td></tr><tr><td><code>traits.intellect</code></td><td>Mod. Inteligência</td></tr><tr><td><code>ability</code></td><td>Habilidade Especial (ex.: Escudo Térmico Ativo)</td></tr><tr><td><code>defense</code></td><td>CA (Classe de Armadura)</td></tr><tr><td><code>pool</code></td><td>Energia (células)</td></tr><tr><td><code>pool.max = 2 × start</code></td><td>6/12, 5/10, 7/14…</td></tr><tr><td><code>down</code></td><td>Androide desligado / inconsciente</td></tr><tr><td><code>replaced</code></td><td>Androide destruído → jogador assume outro do catálogo</td></tr><tr><td>d12 A / d12 B</td><td>Esperança / Medo</td></tr><tr><td>Forças opostas</td><td>Hope (dourado) / Fear (roxo)</td></tr></tbody></table>
+<h2 id="14-uma-skin-alternativa-teste-de-estanqueidade">14. Uma skin alternativa (teste de estanqueidade)</h2>
+<p>Para provar que o motor aguenta outro universo, o mesmo núcleo vestido de fantasia sombria:</p>
+<table><thead><tr><th>Motor</th><th>Skin "Reino Cinza"</th></tr></thead><tbody><tr><td>d12 A / d12 B</td><td>Fé / Dúvida</td></tr><tr><td>traços</td><td>Lâmina, Sombra, Relíquia</td></tr><tr><td>pool</td><td>Vigor</td></tr><tr><td><code>down</code></td><td>Nocaute</td></tr><tr><td><code>replaced</code></td><td>"Chamado Final" (um escudeiro assume o posto)</td></tr><tr><td>moeda</td><td>Latão → Diamante (mesma escala, nomes do reino)</td></tr><tr><td>itens</td><td>relíquias com dado de dano</td></tr></tbody></table>
+<p>Se algo nesta tabela exigir mudança no motor, a separação vazou.</p>
+<hr>
+<h1 id="parte-iii-contrato-de-dados">Parte III — Contrato de Dados</h1>
+<h2 id="15-como-o-motor-le-a-skin">15. Como o motor lê a skin</h2>
+<p>O motor recebe a skin por um <strong>manifesto</strong> (<code>skin.json</code>) — um único ponto de entrada — e nunca importa arquivos de skin diretamente:</p>
+<pre><code class="lang-json">{
+  "forces":   { "a": "Esperança", "b": "Medo" },
+  "traits":   ["attack", "intellect", "ability"],
+  "resource": { "name": "Energia", "maxFactor": 2 },
+  "currency": ["Latão", "Cobre", "Bronze", "Prata", "Ouro", "Platina", "Diamante"],
+  "entities": "data/robots.json",
+  "world":    "data/lore/index.json",
+  "theme":    "sna.css"
+}</code></pre>
+<p><strong>Decidido:</strong> o manifesto é o <code>skin.json</code>.</p>
+<h2 id="16-regras-de-fronteira">16. Regras de fronteira</h2>
+<ol><li>Motor não lê <code>data/lore/</code> — só a UI de lore lê.</li><li>Motor não conhece cores nem imagens — só a camada de apresentação.</li><li>Prompts de IA (<code>prompts/</code>) são <strong>skin</strong>: descrevem o mundo, não resolvem regra.</li><li>Trocar a skin = trocar o manifesto + os dados. Zero alteração no motor.</li></ol>
+<h2 id="17-repositorio-e-empacotamento-wai-core">17. Repositório e empacotamento — <code>wai-core</code></h2>
+<p>O motor vive em repositório próprio, <code>wai-core</code>, seguindo o padrão dos outros projetos. O SnA (e qualquer skin) é um consumidor.</p>
+<pre><code>wai-core/             ← motor puro: sem lore, sem imagens, sem nomes
+├── src/              ← resolução, entidades, pools, moeda, itens
+├── dist/             ← build consumível (wai.js / wai.mjs)
+└── docs/             ← este livro de regras
+
+&lt;skin&gt;/               ← ex.: SpaceshipAndAliens
+├── skin.json         ← manifesto (forces, traits, resource, currency, paths)
+├── data/             ← roster, lore, imagens
+├── prompts/          ← flavor de IA
+└── *.html            ← UI que consome o wai-core</code></pre>
+<ul><li>A skin depende do <code>wai-core</code>; o <code>wai-core</code> <strong>nunca</strong> depende de skin.</li><li>Este documento pertence ao <code>wai-core</code> — deve migrar para lá quando o repo for criado.</li><li>O motor é publicável como pacote (npm) para reuso.</li></ul>
+<hr>
+<h2 id="apendice-glossario-neutro">Apêndice — Glossário neutro</h2>
+<table><thead><tr><th>Termo do motor</th><th>Significado</th></tr></thead><tbody><tr><td><strong>Entidade</strong></td><td>Qualquer coisa que age</td></tr><tr><td><strong>Traço</strong></td><td>Modificador numérico nomeado</td></tr><tr><td><strong>Duelo</strong></td><td>Rolagem de dois d12 opostos</td></tr><tr><td><strong>Tom</strong></td><td>Qual d12 saiu maior (favorável/adverso)</td></tr><tr><td><strong>DC</strong></td><td>Dificuldade alvo</td></tr><tr><td><strong>Reserva / Pool</strong></td><td>Recurso tático que sobe e desce</td></tr><tr><td><strong>Faixa</strong></td><td>Cruzamento de tom × sucesso</td></tr><tr><td><strong>Down</strong></td><td>Fora de ação, mas existente</td></tr><tr><td><strong>Replaced</strong></td><td>Terminado; substituto assume</td></tr><tr><td><strong>Moeda</strong></td><td>Escala de 7 denominações fixas</td></tr><tr><td><strong>Skin</strong></td><td>Dados que vestem o motor (nomes, prosa, imagens)</td></tr></tbody></table>
+<hr>
+<h2 id="decisoes-fechadas">Decisões fechadas</h2>
+<ul><li>§1 pool único · §2 traço padrão (+0, valor dado pelo mestre) · §4 Crítico/Revés são dificuldade narrativa · §5 skin traz tabela de DCs · §7 <code>max = 2× start</code>, recupera por desfecho favorável · §8 <code>down</code>/<code>replaced</code> redefinidos, substituto é outro personagem · §9 itens modificam traços · §10 crédito separado do pool, acumulativo · §15 <code>skin.json</code>.</li></ul>
+<p>Nenhum ponto em aberto no módulo básico.</p>
+</article></main>
+</div>
+</body>
+</html>

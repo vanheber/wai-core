@@ -1,0 +1,14 @@
+{
+  "name": "wai-core",
+  "version": "0.1.0",
+  "description": "WAI GAME System — motor universal de RPG (Wide Adventure Interface)",
+  "type": "module",
+  "main": "src/wai.js",
+  "exports": {
+    ".": "./src/wai.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "docs": "node scripts/build-docs.js"
+  }
+}
