@@ -10,14 +10,13 @@
 
 ## Preâmbulo — por que separar
 
-Hoje o Spaceships and Aliens é um sistema onde regra e universo estão
-entrelaçados: os androides têm `attack` e `intellect`, a Tiburon tem
-combustível, o drone tem CA 10. Se quisermos reusar o motor para fantasia,
-cyberpunk ou horror, temos que separar duas coisas que hoje vivem juntas:
+Um sistema onde regra e universo vivem entrelaçados é difícil de reusar. Para
+levar o mesmo motor a outro universo — fantasia, cyberpunk, horror —, separamos
+duas coisas:
 
 - **Motor (WAI)** — resolve o que acontece. Dados, faixas de desfecho,
-  recursos, desgaste, substituição. Não conhece "androide", "Tiburon" nem
-  "esperança".
+  recursos, desgaste, substituição. Não conhece nenhum nome próprio, cor ou
+  imagem.
 - **Skin** — diz o que as coisas *são*. Nomes, prosa, imagens, paleta,
   taxonomia do mundo. Não faz conta nenhuma.
 
@@ -57,9 +56,9 @@ torreta. O motor não distingue: todos têm os mesmos campos.
 Traços são modificadores numéricos nomeados. O motor não sabe o que significam;
 só soma. A skin decide quais existem.
 
-- O SnA usa três: **Ataque**, **Inteligência**, **Especialidade** (a `ability`).
-- Uma skin de fantasia poderia usar **Força**, **Astúcia**, **Arcano**.
-- Uma skin de horror poderia usar **Sangue-frio**, **Percepção**, **Vontade**.
+- Uma skin sci-fi poderia usar **Ataque**, **Sistemas**, **Especialidade**.
+- Uma skin de fantasia, **Força**, **Astúcia**, **Arcano**.
+- Uma skin de horror, **Sangue-frio**, **Percepção**, **Vontade**.
 
 O motor só exige: *um traço é um número somado a uma rolagem quando a ficção
 pedir.* Quantos traços, e seus nomes, são escolha da skin.
@@ -77,9 +76,9 @@ opostos** — não um dado de sucesso, mas uma *balança*.
 Duelo = d12(A) + d12(B) + modificador ± d6(vantagem/desvantagem)
 ```
 
-Onde `A` e `B` são as duas forças opostas da ficção. O SnA as chama de
-**Esperança** e **Medo**. Outra skin pode chamá-las de **Luz/Sombra**,
-**Ordem/Caos**, **Corpo/Máquina**. O motor só compara qual face saiu maior.
+Onde `A` e `B` são as duas forças opostas da ficção — cada skin as nomeia.
+Exemplos: **Fé/Dúvida**, **Luz/Sombra**, **Ordem/Caos**, **Corpo/Máquina**. O
+motor só compara qual face saiu maior.
 
 > **Por que dois dados em vez de um?** Um único d20 diz *se* deu certo. Dois
 > dados opostos dizem *se* deu certo **e a que custo** — a mesma soma pode
@@ -142,8 +141,8 @@ mantém o eixo narrativo (sorte/perigo) independente do eixo tático (bônus).
 
 ## 7. Reservas (Pools)
 
-Uma reserva é um recurso tático que sobe e desce. No SnA é a **Energia**;
-numa skin de horror poderia ser **Sanidade**; em fantasia, **Mana**.
+Uma reserva é um recurso tático que sobe e desce — **Energia**, **Sanidade**,
+**Mana**, **Vigor**; a skin nomeia.
 
 | Operação | Gatilho |
 |---|---|
@@ -170,13 +169,13 @@ skin — só com a capacidade de agir:
 
 O motor define as transições: ao zerar o pool, `active → down`. A passagem
 `down → replaced` é decisão da mesa (ou da lore), não automática. O
-**substituto é outro personagem**, escolhido pela skin — não um chassi
-genérico. Retornar de `replaced` é, por padrão, impossível; a skin pode abrir
-exceções narrativas.
+**substituto é outra entidade**, escolhida pela skin — não um chassi genérico.
+Retornar de `replaced` é, por padrão, impossível; a skin pode abrir exceções
+narrativas.
 
-**Nota:** o "Protocolo Drone" do SnA era um substituto genérico. Sob esta
-definição ele deixa de ser regra do motor — a skin SnA define que, ao ser
-`replaced`, o jogador assume outro androide do catálogo.
+**Nota:** o substituto não é regra do motor. A skin decide se, ao ser
+`replaced`, outra entidade do roster assume — um aliado, um chassi reserva, um
+herdeiro.
 
 ## 9. Itens
 
@@ -184,7 +183,7 @@ Um Item tem nome, um dado de dano opcional e tags livres. O motor usa:
 `damage` (número), `dice` (ex.: `2d6`), bônus de traço, e `tags`.
 
 **Decidido:** itens modificam traços, dependendo do tipo. Um item pode somar a
-um traço (ex.: `+1` em Ataque), carregar dano, ou ambos. O motor soma
+um traço (ex.: `+1` em um traço), carregar dano, ou ambos. O motor soma
 `traço + bônus de item` quando a ficção pedir.
 
 ## 10. Moeda
@@ -239,37 +238,21 @@ plugável, ativado pela skin:
 
 A skin é **dado puro**. Ela nunca calcula. Ela entrega:
 
-| Elemento | Exemplo SnA |
+| Elemento | Exemplo (skin) |
 |---|---|
-| **Nomes das forças opostas** | Esperança / Medo |
-| **Nomes dos traços** | Ataque, Inteligência, Especialidade |
-| **Roster de entidades** | os 10 androides (`data/robots.json`) |
-| **Nomes dos recursos** | Energia / Células |
+| **Nomes das forças opostas** | Fé / Dúvida |
+| **Nomes dos traços** | Lâmina, Sombra, Relíquia |
+| **Roster de entidades** | lista de personagens (`data/entities.json`) |
+| **Nomes dos recursos** | Vigor |
 | **Nomes da moeda** | Latão → Diamante |
 | **Taxonomia do mundo** | a árvore de lore (`data/lore/`) |
 | **Prosa e imagens** | `.md` + `.webp` por entrada |
-| **Paleta e ícones** | `sna.css` + `img/` |
+| **Paleta e ícones** | `theme.css` + `img/` |
 | **Prompts de IA** | `prompts/*.js` (flavor, não regra) |
 
-## 13. SnA como skin nº 1 (mapeamento)
+## 13. Uma skin de exemplo (teste de estanqueidade)
 
-| Motor | Skin SnA |
-|---|---|
-| Entidade | Androide / PNJ / Nave |
-| `traits.attack` | Mod. Ataque |
-| `traits.intellect` | Mod. Inteligência |
-| `ability` | Habilidade Especial (ex.: Escudo Térmico Ativo) |
-| `defense` | CA (Classe de Armadura) |
-| `pool` | Energia (células) |
-| `pool.max = 2 × start` | 6/12, 5/10, 7/14… |
-| `down` | Androide desligado / inconsciente |
-| `replaced` | Androide destruído → jogador assume outro do catálogo |
-| d12 A / d12 B | Esperança / Medo |
-| Forças opostas | Hope (dourado) / Fear (roxo) |
-
-## 14. Uma skin alternativa (teste de estanqueidade)
-
-Para provar que o motor aguenta outro universo, o mesmo núcleo vestido de
+Para provar que o motor aguenta qualquer universo, o mesmo núcleo vestido de
 fantasia sombria:
 
 | Motor | Skin "Reino Cinza" |
@@ -288,44 +271,43 @@ Se algo nesta tabela exigir mudança no motor, a separação vazou.
 
 # Parte III — Contrato de Dados
 
-## 15. Como o motor lê a skin
+## 14. Como o motor lê a skin
 
 O motor recebe a skin por um **manifesto** (`skin.json`) — um único ponto de
 entrada — e nunca importa arquivos de skin diretamente:
 
 ```json
 {
-  "forces":   { "a": "Esperança", "b": "Medo" },
-  "traits":   ["attack", "intellect", "ability"],
-  "resource": { "name": "Energia", "maxFactor": 2 },
+  "forces":   { "a": "Fé", "b": "Dúvida" },
+  "traits":   ["lamina", "sombra", "reliquia"],
+  "resource": { "name": "Vigor", "maxFactor": 2 },
   "currency": ["Latão", "Cobre", "Bronze", "Prata", "Ouro", "Platina", "Diamante"],
-  "entities": "data/robots.json",
+  "entities": "data/entities.json",
   "world":    "data/lore/index.json",
-  "theme":    "sna.css"
+  "theme":    "theme.css"
 }
 ```
 
 **Decidido:** o manifesto é o `skin.json`.
 
-## 16. Regras de fronteira
+## 15. Regras de fronteira
 
 1. Motor não lê `data/lore/` — só a UI de lore lê.
 2. Motor não conhece cores nem imagens — só a camada de apresentação.
 3. Prompts de IA (`prompts/`) são **skin**: descrevem o mundo, não resolvem regra.
 4. Trocar a skin = trocar o manifesto + os dados. Zero alteração no motor.
 
-## 17. Repositório e empacotamento — `wai-core`
+## 16. Repositório e empacotamento — `wai-core`
 
-O motor vive em repositório próprio, `wai-core`, seguindo o padrão dos outros
-projetos. O SnA (e qualquer skin) é um consumidor.
+O motor vive em repositório próprio, `wai-core`. Cada skin é um consumidor.
 
 ```
 wai-core/             ← motor puro: sem lore, sem imagens, sem nomes
 ├── src/              ← resolução, entidades, pools, moeda, itens
-├── dist/             ← build consumível (wai.js / wai.mjs)
-└── docs/             ← este livro de regras
+├── docs/             ← este livro de regras (+ HTML navegável)
+└── scripts/          ← geração de docs
 
-<skin>/               ← ex.: SpaceshipAndAliens
+<skin>/               ← um universo qualquer
 ├── skin.json         ← manifesto (forces, traits, resource, currency, paths)
 ├── data/             ← roster, lore, imagens
 ├── prompts/          ← flavor de IA
@@ -333,8 +315,7 @@ wai-core/             ← motor puro: sem lore, sem imagens, sem nomes
 ```
 
 - A skin depende do `wai-core`; o `wai-core` **nunca** depende de skin.
-- Este documento pertence ao `wai-core` — deve migrar para lá quando o repo
-  for criado.
+- Este documento pertence ao `wai-core`.
 - O motor é publicável como pacote (npm) para reuso.
 
 ---
@@ -362,7 +343,7 @@ wai-core/             ← motor puro: sem lore, sem imagens, sem nomes
 - §1 pool único · §2 traço padrão (+0, valor dado pelo mestre) ·
   §4 Crítico/Revés são dificuldade narrativa · §5 skin traz tabela de DCs ·
   §7 `max = 2× start`, recupera por desfecho favorável · §8 `down`/`replaced`
-  redefinidos, substituto é outro personagem · §9 itens modificam traços ·
-  §10 crédito separado do pool, acumulativo · §15 `skin.json`.
+  redefinidos, substituto é outra entidade · §9 itens modificam traços ·
+  §10 crédito separado do pool, acumulativo · §14 `skin.json`.
 
 Nenhum ponto em aberto no módulo básico.

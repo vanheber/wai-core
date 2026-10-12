@@ -7,7 +7,7 @@ lore, nomes, prosa, imagens, paleta — é **skin**, um dado externo que veste o
 motor. O `wai-core` nunca depende de uma skin; cada skin depende dele.
 
 - **Livro de regras:** [`docs/livro-regras-universal.md`](docs/livro-regras-universal.md) ([HTML navegável](docs/index.html))
-- **Primeira skin:** [SpaceshipsAndAliens](https://github.com/vanheber/SpaceshipsAndAliens)
+- **Skins:** vivem em repositórios próprios e dependem do `wai-core`.
 
 ## Estrutura
 
