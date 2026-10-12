@@ -15,8 +15,8 @@ levar o mesmo motor a outro universo — fantasia, cyberpunk, horror —, separa
 duas coisas:
 
 - **Motor (WAI)** — resolve o que acontece. Dados, faixas de desfecho,
-  recursos, desgaste, substituição. Não conhece nenhum nome próprio, cor ou
-  imagem.
+  recursos, dano, desgaste, substituição. Não conhece nenhum nome próprio, cor
+  ou imagem.
 - **Skin** — diz o que as coisas *são*. Nomes, prosa, imagens, paleta,
   taxonomia do mundo. Não faz conta nenhuma.
 
@@ -25,9 +25,9 @@ enxerga. Trocar de skin não deve mexer em uma linha do motor.
 
 **Contrato de separação (a regra de ouro):**
 
-> O motor só conhece *entidades*, *traços*, *reservas*, *itens*, *moeda* e
-> *dados*. Se um nome próprio, uma cor ou uma imagem aparece na lógica, algo
-> vazou.
+> O motor só conhece *entidades*, *traços*, *reservas*, *itens*, *dano*,
+> *moeda* e *dados*. Se um nome próprio, uma cor ou uma imagem aparece na
+> lógica, algo vazou.
 
 ---
 
@@ -43,13 +43,14 @@ torreta. O motor não distingue: todos têm os mesmos campos.
 |---|---|---|
 | `id` | string | Identificador estável |
 | `traits` | mapa nome→número | Modificadores numéricos |
-| `defense` | número | Dificuldade de ser atingido |
-| `ability` | `{ name, trait, value }` | Traço especial com bônus próprio |
-| `pool` | `{ start, max, current }` | Reserva de recurso |
+| `defense` | número | **CA** — dificuldade de ser atingido (armadura, escudo, campo de força) |
+| `ability` | `{ name, trait, value, cost }` | **Poder** — bônus próprio, custa pool (§10.3) |
+| `pool` | `{ start, max, current }` | Reserva de vida **e** recurso (§7) |
 | `items` | lista de Item | Equipamento carregado |
 | `state` | enum | `active` \| `down` \| `replaced` |
+| `credit` | número | Saldo de moeda, separado do pool (§11) |
 
-**Decidido:** pool único, para simplicidade.
+**Decidido:** pool único, para simplicidade. Crédito é dinheiro, não é pool.
 
 ## 2. Traços
 
@@ -88,31 +89,38 @@ motor só compara qual face saiu maior.
 ### 3.1 Determinação do resultado
 
 1. Role `d12(A)` e `d12(B)`.
-2. Compare os dois **entre si** — isso define o *tom* (favorável ou adverso).
-3. Some tudo com o modificador e o d6, se houver.
-4. Compare a **soma** com a **Dificuldade (DC)** — isso define *sucesso ou falha*.
-5. Cruze tom × sucesso para achar a **faixa de desfecho**.
+2. Se as faces forem **iguais**, é **crítico** — e o DC é ignorado (§4). Pare
+   aqui: `A = B ≥ 2` é sucesso absoluto, `1 e 1` é falha crítica.
+3. Compare os dois **entre si** — isso define o *tom* (favorável ou adverso).
+4. Some tudo com o modificador e o d6, se houver.
+5. Compare a **soma** com a **Dificuldade (DC)** — isso define *sucesso ou falha*.
+6. Cruze tom × sucesso para achar a **faixa de desfecho**.
 
 ## 4. Faixas de Desfecho
 
-O cruzamento produz cinco faixas. Cada uma concede (ou não) uma unidade de
+O cruzamento produz **seis** faixas. Cada uma concede (ou não) uma unidade de
 recurso ao pool:
 
-| Faixa | Condição | Sucesso? | Tom | Recurso |
-|---|---|---|---|---|
-| **Crítico** | A = B | sim/falha *intensa* | — | +1 |
-| **Triunfo** | A > B e soma ≥ DC | sucesso | favorável | +1 |
-| **Abertura** | A > B e soma < DC | falha | favorável | +1 |
-| **Custo** | A < B e soma ≥ DC | sucesso | adverso | 0 |
-| **Revés** | A < B e soma < DC | falha | adverso | 0 |
+| Faixa | Condição | Sucesso? | Recurso |
+|---|---|---|---|
+| **Crítico** | A = B ≥ 2 | **sucesso absoluto** (ignora o DC) | +1 |
+| **Falha crítica** | A = 1 e B = 1 | falha | 0 |
+| **Triunfo** | A > B e soma ≥ DC | sucesso | +1 |
+| **Abertura** | A > B e soma < DC | falha | +1 |
+| **Custo** | A < B e soma ≥ DC | sucesso | 0 |
+| **Revés** | A < B e soma < DC | falha | 0 |
 
 **A regra do recurso:** *tom favorável sempre rende recurso, mesmo falhando.*
 A ideia é que sorte e infortúnio não dependem do sucesso da tarefa — você pode
 falhar a ação e ainda sair com uma abertura. É deliberado.
 
-**Decidido — Crítico:** o empate concede `+1` ao pool; o peso narrativo (o
-"destino se manifesta") é *dificuldade narrativa* — interpretada pelo narrador
-e pela skin, sem efeito mecânico obrigatório no motor.
+**Decidido — Crítico:** empate com valor ≥ 2 é **sucesso absoluto**: sem
+comparação com o DC. Em ataque, concede **dano máximo** (§10.2).
+
+**Decidido — Falha crítica (1 e 1):** dá **+1 Medo ao GM** e efeitos narrativos
+negativos. O motor só **reporta** o evento (`gmFear: 1`); ele não rastreia um
+pool de Medo — a skin/UI cuida disso. Nada é debitado do pool do jogador de
+forma automática.
 
 **Decidido — Revés:** o motor não cobra recurso. O agravamento da cena é
 *dificuldade narrativa*, a cargo do narrador.
@@ -121,8 +129,11 @@ e pela skin, sem efeito mecânico obrigatório no motor.
 
 - **Modificador:** o número do traço relevante, escolhido pelo narrador antes
   da rolagem. O motor recebe um número; não valida a escolha.
-- **DC (Dificuldade):** alvo fixo definido pela cena. O motor não sugere DCs —
-  isso é ferramenta da skin (uma tabela de dificuldades por contexto).
+- **DC (Dificuldade):** alvo fixo definido pela cena. **Obrigatório** — não há
+  valor padrão, porque um padrão faria tudo suceder. Em ataque, a DC vem da
+  `defense` do alvo (§10.1).
+- **Bônus de poder:** quando um poder é ativado, seu `value` soma ao teste e
+  seu `cost` drena o pool (§10.3).
 
 **Decidido:** a skin traz uma tabela canônica de DCs (ex.: Fácil 8 / Médio 12 /
 Difícil 16). O motor não a define, mas conta com ela para padronizar os testes.
@@ -141,20 +152,26 @@ mantém o eixo narrativo (sorte/perigo) independente do eixo tático (bônus).
 
 ## 7. Reservas (Pools)
 
-Uma reserva é um recurso tático que sobe e desce — **Energia**, **Sanidade**,
-**Mana**, **Vigor**; a skin nomeia.
+Uma reserva é o recurso tático da entidade — e ela é **duas coisas ao mesmo
+tempo: vida e recurso** (Energia, Sanidade, Mana, Vigor; a skin nomeia).
 
 | Operação | Gatilho |
 |---|---|
-| `+1` | desfecho favorável (ver §4) ou habilidade |
-| `−1` | gasto manual ou evento da ficção |
+| `+1` | desfecho favorável (§4) ou ajuda externa (mestre, item, evento) |
+| `−N` | dano recebido (§10.1), poder ativado (§10.3), gasto manual, evento da ficção |
 | teto | `max` — nada passa disso |
-| piso | `0` — dispara o estado `down` (ver §8) |
+| piso | `0` — dispara o estado `down` (§8) |
 
 **Decidido:** `max = 2 × start` é regra do motor — todo pool dobra, sem exceção
 de skin. A recuperação principal vem do **desfecho favorável** (§4): tom
-favorável rende `+1`, mesmo em falha. Ajuda externa (o mestre, um item, uma
-habilidade, um evento) também pode restaurar recurso.
+favorável rende `+1`, mesmo em falha.
+
+**Decidido — por que dano e poder compartilham o pool:** usar um poder torna a
+entidade mais vulnerável, porque tira do mesmo reservatório que sustenta a vida.
+É a contenção do sistema: poder tem custo real e exige critério, em vez de
+ações cinematográficas ilimitadas.
+
+**Nota:** gasta além do atual **nunca vira saldo negativo** — o piso é `0`.
 
 ## 8. Estados e Substituição
 
@@ -164,11 +181,11 @@ skin — só com a capacidade de agir:
 | Estado | Significado | Recuperação |
 |---|---|---|
 | `active` | Opera normalmente | — |
-| `down` | Não pode agir, mas ainda existe (desligado, inconsciente, exausto) | volta a `active` quando recuperar |
+| `down` | Não pode agir, mas ainda existe (desligado, inconsciente, exausto) | volta a `active` quando recuperar pool |
 | `replaced` | Terminado (morto, destruído, desligado permanentemente) | só volta se a lore permitir (reconstrução, ressurreição…) |
 
-O motor define as transições: ao zerar o pool, `active → down`. A passagem
-`down → replaced` é decisão da mesa (ou da lore), não automática. O
+O motor define as transições: ao zerar o pool de vida, `active → down`. A
+passagem `down → replaced` é decisão da mesa (ou da lore), não automática. O
 **substituto é outra entidade**, escolhida pela skin — não um chassi genérico.
 Retornar de `replaced` é, por padrão, impossível; a skin pode abrir exceções
 narrativas.
@@ -184,9 +201,55 @@ Um Item tem nome, um dado de dano opcional e tags livres. O motor usa:
 
 **Decidido:** itens modificam traços, dependendo do tipo. Um item pode somar a
 um traço (ex.: `+1` em um traço), carregar dano, ou ambos. O motor soma
-`traço + bônus de item` quando a ficção pedir.
+`traço + bônus de item` quando a ficção pedir. O `damage`/`dice` é o que o
+ataque aplica (§10.2).
 
-## 10. Moeda
+## 10. Dano, Ataque e Poderes
+
+Dano recebido, poderes ativados e gastos manuais consomem **o mesmo pool** (§7).
+É o que dá peso tático ao sistema.
+
+### 10.1 Ataque
+
+Um ataque é um duelo (§3) cuja **DC é a `defense` do alvo**:
+
+| Passo | Regra |
+|---|---|
+| 1 | Atacante rola o duelo com `dc = defense` do alvo |
+| 2 | **Sucesso** (crítico, triunfo ou custo) → acerta e aplica o dano do item ao pool do alvo |
+| 3 | **Crítico** (A = B ≥ 2) → dano **máximo** e sem comparação com o DC |
+| 4 | **Falha** (abertura, revés ou falha crítica) → erra, sem dano |
+
+`defense` é a **CA**: armadura, escudo, campo de força — o que a skin definir.
+Um alvo sem proteção tem `defense = 0`.
+
+### 10.2 Dano
+
+- `item.dice` (ex.: `2d6`) → rolagem normal.
+- `item.damage` (número) → dano fixo, quando o item não tem dado.
+- **Crítico → máximo** do dado: `2d6` vira `12`.
+- O dano baixa o pool do alvo; ao chegar em `0`, `active → down` (§8).
+
+### 10.3 Poderes
+
+Um poder é o `ability` da entidade:
+
+| Campo | Papel |
+|---|---|
+| `name` | Nome do poder (dado da skin) |
+| `trait` | Traço com que o teste é feito |
+| `value` | Bônus somado ao teste |
+| `cost` | Pool gasto ao ativar |
+
+Ativar gasta `cost` e soma `value` quando o traço casa. Pool insuficiente ou
+estado `down` → o poder **não** ativa. Poder sem rolagem é um gasto manual de
+pool (`spendPool`).
+
+**Decidido — recurso único do jogador:** o pool é o **único** recurso do
+jogador. Itens ou poderes especiais podem alterar isso, mas só de forma
+narrativa — nunca automática.
+
+## 11. Moeda
 
 O motor define uma **escala monetária de denominações fixas**. Os valores são
 regra; os nomes são skin.
@@ -215,18 +278,16 @@ Regras:
 
 **Decidido:** crédito é **separado** do pool de recursos — não confundir os
 dois. O saldo é dinheiro puro, **acumulativo**, sem teto `2×` e sem piso
-`down`. O pool (§7) é autonomia tática; o crédito é riqueza.
+`down`. O pool (§7) é vida e autonomia tática; o crédito é riqueza.
 
-## 11. Módulos do "Básico Universal"
+## 12. Módulos do "Básico Universal"
 
-O **módulo básico** é o mínimo para jogar: §1–§10. Tudo o mais é opcional e
+O **módulo básico** é o mínimo para jogar: **§1–§11**. Tudo o mais é opcional e
 plugável, ativado pela skin:
 
 | Módulo | O que adiciona | Estado |
 |---|---|---|
-| **Básico** | Entidades, duelos, pools, itens, moeda | núcleo |
-| **Substituição** | Estado `replaced` + entidade substituta | opcional |
-| **Moeda** | Escala monetária + saldo + preços | opcional |
+| **Básico** | Entidades, duelos, pools, dano, itens, moeda | núcleo |
 | **Progressão** | Entidades evoluem entre sessões | não existe hoje |
 | **Facções** | Entidades com relações e moral | não existe hoje |
 
@@ -234,7 +295,7 @@ plugável, ativado pela skin:
 
 # Parte II — A Skin
 
-## 12. O que a skin fornece
+## 13. O que a skin fornece
 
 A skin é **dado puro**. Ela nunca calcula. Ela entrega:
 
@@ -250,7 +311,7 @@ A skin é **dado puro**. Ela nunca calcula. Ela entrega:
 | **Paleta e ícones** | `theme.css` + `img/` |
 | **Prompts de IA** | `prompts/*.js` (flavor, não regra) |
 
-## 13. Uma skin de exemplo (teste de estanqueidade)
+## 14. Uma skin de exemplo (teste de estanqueidade)
 
 Para provar que o motor aguenta qualquer universo, o mesmo núcleo vestido de
 fantasia sombria:
@@ -259,7 +320,9 @@ fantasia sombria:
 |---|---|
 | d12 A / d12 B | Fé / Dúvida |
 | traços | Lâmina, Sombra, Relíquia |
-| pool | Vigor |
+| pool (vida + recurso) | Vigor |
+| `defense` | "Peitoral" / "Escudo do Altar" |
+| `ability` | "Golpe do Juízo" (custa Vigor) |
 | `down` | Nocaute |
 | `replaced` | "Chamado Final" (um escudeiro assume o posto) |
 | moeda | Latão → Diamante (mesma escala, nomes do reino) |
@@ -271,7 +334,7 @@ Se algo nesta tabela exigir mudança no motor, a separação vazou.
 
 # Parte III — Contrato de Dados
 
-## 14. Como o motor lê a skin
+## 15. Como o motor lê a skin
 
 O motor recebe a skin por um **manifesto** (`skin.json`) — um único ponto de
 entrada — e nunca importa arquivos de skin diretamente:
@@ -290,20 +353,20 @@ entrada — e nunca importa arquivos de skin diretamente:
 
 **Decidido:** o manifesto é o `skin.json`.
 
-## 15. Regras de fronteira
+## 16. Regras de fronteira
 
 1. Motor não lê `data/lore/` — só a UI de lore lê.
 2. Motor não conhece cores nem imagens — só a camada de apresentação.
 3. Prompts de IA (`prompts/`) são **skin**: descrevem o mundo, não resolvem regra.
 4. Trocar a skin = trocar o manifesto + os dados. Zero alteração no motor.
 
-## 16. Repositório e empacotamento — `wai-core`
+## 17. Repositório e empacotamento — `wai-core`
 
 O motor vive em repositório próprio, `wai-core`. Cada skin é um consumidor.
 
 ```
 wai-core/             ← motor puro: sem lore, sem imagens, sem nomes
-├── src/              ← resolução, entidades, pools, moeda, itens
+├── src/              ← resolução, entidades, pools, dano, moeda, itens
 ├── docs/             ← este livro de regras (+ HTML navegável)
 └── scripts/          ← geração de docs
 
@@ -328,9 +391,14 @@ wai-core/             ← motor puro: sem lore, sem imagens, sem nomes
 | **Traço** | Modificador numérico nomeado |
 | **Duelo** | Rolagem de dois d12 opostos |
 | **Tom** | Qual d12 saiu maior (favorável/adverso) |
-| **DC** | Dificuldade alvo |
-| **Reserva / Pool** | Recurso tático que sobe e desce |
-| **Faixa** | Cruzamento de tom × sucesso |
+| **DC** | Dificuldade alvo (obrigatória; em ataque, a CA do alvo) |
+| **CA / Defense** | Dificuldade de ser atingido |
+| **Reserva / Pool** | Vida **e** recurso da entidade |
+| **Faixa** | Cruze de tom × sucesso (ou crítico) |
+| **Dano** | Perda de pool causada por ataque |
+| **Poder / Ability** | Traço especial que soma bônus e custa pool |
+| **Crédito** | Saldo de moeda, separado do pool |
+| **Medo do GM** | Evento reportado em falha crítica (`gmFear`) |
 | **Down** | Fora de ação, mas existente |
 | **Replaced** | Terminado; substituto assume |
 | **Moeda** | Escala de 7 denominações fixas |
@@ -340,10 +408,15 @@ wai-core/             ← motor puro: sem lore, sem imagens, sem nomes
 
 ## Decisões fechadas
 
-- §1 pool único · §2 traço padrão (+0, valor dado pelo mestre) ·
-  §4 Crítico/Revés são dificuldade narrativa · §5 skin traz tabela de DCs ·
-  §7 `max = 2× start`, recupera por desfecho favorável · §8 `down`/`replaced`
-  redefinidos, substituto é outra entidade · §9 itens modificam traços ·
-  §10 crédito separado do pool, acumulativo · §14 `skin.json`.
+- §1 pool único · `credit` separado · `defense` = CA · `ability` =
+  `{ name, trait, value, cost }` · §2 traço padrão (+0, valor dado pelo mestre) ·
+  §3 dc obrigatório (sem padrão) · §4 Crítico = sucesso absoluto (`A = B ≥ 2`),
+  Falha crítica = `1 e 1` (+1 Medo ao GM, reportado), Revés é dificuldade
+  narrativa · §5 skin traz tabela de DCs · §7 `max = 2× start`, pool = vida +
+  recurso, recupera por desfecho favorável, piso 0 · §8 `down`/`replaced`
+  redefinidos, substituto é outra entidade · §9 itens modificam traços e
+  carregam dano · §10 crítico = dano máximo, poder gasta pool, Medo do GM
+  reportado e não rastreado · §11 crédito separado do pool, acumulativo ·
+  §12 Básico = §1–§11, opcionais = Progressão/Facções · §15 `skin.json`.
 
 Nenhum ponto em aberto no módulo básico.
