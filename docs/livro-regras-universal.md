@@ -380,6 +380,69 @@ wai-core/             ← motor puro: sem lore, sem imagens, sem nomes
 - A skin depende do `wai-core`; o `wai-core` **nunca** depende de skin.
 - Este documento pertence ao `wai-core`.
 - O motor é publicável como pacote (npm) para reuso.
+- A **sala** — estado de sessão, sincronização GM↔jogador, papéis, log de
+  rolagens — é uma terceira camada, `wai-table`: nem motor, nem skin. Depende
+  do `wai-core`; as skins dependem das duas.
+
+---
+
+## 18. Contrato de skin — os cards
+
+Todo o que a UI consegue resumir num card é card. O card é **padronizado**:
+mesma geometria para personagem, item, poder e aventura, de modo que as duas
+assinaturas — a da skin em cima, a do sistema embaixo — apareçam em todos.
+
+### 18.1 Geometria (9:16)
+
+| Zona | Conteúdo | Origem do dado |
+|---|---|---|
+| Faixa superior (fina) | assinatura **da skin** | `img/brand/<skin>.svg` |
+| ⅔ superior | ilustração de fundo | `entity.image` |
+| ↳ canto sup. esq./dir. | **2 traços de manchete** (nome + valor) | `entity.traits`, escolhidos por `skin.headlineTraits` |
+| ↳ canto inf. esq. | **PV** — pool `atual/máx` | `entity.pool` |
+| ↳ canto inf. dir. | **Armadura** | `entity.defense` |
+| ⅓ inferior | caixa de texto (estilo MTG): nome, tipo e prosa com palavras-chave linkadas | `entity.desc`, `entity.ability` |
+| Faixa inferior (fina) | assinatura **WAI GAME System** | `img/brand/wai.svg` |
+
+### 18.2 Cantos por tipo de card
+
+| Tipo | Cantos superiores | Cantos inferiores |
+|---|---|---|
+| Personagem | 2 traços de manchete | PV / Armadura |
+| Item | dado de dano / bônus de traço | tags |
+| Poder | valor / custo | traço |
+| Aventura | ameaça | — |
+
+### 18.3 Palavras-chave e navegação
+
+Na caixa de texto, `[[nome]]` marca uma palavra-chave que resolve para outro
+card (item, poder ou aventura). As resoluções ficam em `refs`, na forma
+`tipo:id`.
+
+- **Mobile**: o card vinculado abre em `<dialog>` **sobre** o card de origem.
+- **Tablet/desktop**: sem modal — origem e vinculados formam uma **fileira**
+  lado a lado.
+
+### 18.4 Valores, não marcadores
+
+PV, Armadura e recursos aparecem como **número** (`6/12`), nunca como desenho
+de bolinhas. O motor só trabalha com números; a skin apenas para de os
+desenhar como círculos.
+
+### 18.5 Assets — a skin fornece
+
+| Asset | Caminho | Nota |
+|---|---|---|
+| Ilustração do card | `img/cards/<id>.webp` | 9:16 |
+| Assinatura da skin | `img/brand/<skin>.svg` | faixa superior |
+| Assinatura WAI | `img/brand/wai.svg` | faixa inferior; **fornecida uma vez, compartilhada por todas as skins** |
+| Tema | `theme.css` | cores, fontes, breakpoint |
+| Badges de canto | `img/badges/` | opcional |
+
+### 18.6 Progressão (roadmap — não implementado)
+
+Nível = **troca da ficha inteira**: `entity.levels[]` guarda, por nível, o
+card completo e seus itens, previamente estabelecido. Sem interpolação.
 
 ---
 
