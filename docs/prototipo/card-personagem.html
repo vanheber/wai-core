@@ -1,0 +1,287 @@
+<!doctype html>
+<!--
+  WAI GAME System — protótipo do card padrão de personagem (§18.7).
+  Render de referência da PLANTA, não código do motor e não asset de skin:
+  veste a skin de exemplo "Reino Cinza" (§14) com arte placeholder.
+
+  Abrir:  open docs/prototipo/card-personagem.html
+  1:1:    ...card-personagem.html?full=1   (canvas 1080×1920, sem escala)
+
+  Regenerar o PNG (Chrome headless, macOS):
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+      --headless --disable-gpu --hide-scrollbars \
+      --window-size=1080,1920 --force-device-scale-factor=1 \
+      --virtual-time-budget=2000 \
+      --screenshot=docs/prototipo/card-personagem.png \
+      "file://$PWD/docs/prototipo/card-personagem.html?full=1"
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WAI — card de personagem (protótipo §18.7)</title>
+<style>
+  /* ── tokens do tema da skin (theme.css, §18.5) ───────────────────── */
+  :root{
+    --bone:#e9e0cd;          /* texto principal */
+    --bone-70:rgba(233,224,205,.7);
+    --bone-45:rgba(233,224,205,.45);
+    --brass:#c9962f;         /* accent / ornamentos */
+    --rust:#a9502a;          /* segunda cor / glow */
+    --charcoal:#14171a;
+    --panel:#111417;
+    --strip:#0c0e10;
+    --line:rgba(233,224,205,.16);
+    --serif:"Iowan Old Style","Hoefler Text",Palatino,Georgia,serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#08090a;color:var(--bone-70);font-family:var(--sans)}
+  body{display:grid;place-items:center;min-height:100vh;padding:40px 24px;gap:16px}
+  body.full{padding:0;background:#000;place-items:start}
+  .frame{overflow:hidden;flex:none}
+
+  /* ── planta base 1080×1920, escala u = largura/1080 ──────────────── */
+  .wai-card{
+    position:relative;width:1080px;height:1920px;overflow:hidden;
+    background:var(--charcoal);transform-origin:top left;
+    font-kerning:normal;
+  }
+
+  /* arte (0 → 1280 = ⅔) */
+  .art{position:absolute;inset:0 0 auto 0;height:1280px;display:block}
+  .art svg{display:block;width:100%;height:100%}
+  .veil-top{position:absolute;left:0;right:0;top:0;height:240px;pointer-events:none;
+    background:linear-gradient(to bottom,rgba(6,7,8,.72),rgba(6,7,8,0))}
+  .veil-bottom{position:absolute;left:0;right:0;top:1040px;height:240px;pointer-events:none;
+    background:linear-gradient(to bottom,rgba(17,20,23,0),rgba(17,20,23,.82) 62%,var(--panel))}
+
+  /* faixa fina superior: assinatura da skin */
+  .strip{position:absolute;left:0;right:0;height:56px;display:flex;align-items:center;
+    font-family:var(--serif);font-size:20px;letter-spacing:.34em;text-transform:uppercase}
+  .strip.top{top:0;padding-left:40px;color:var(--bone-70)}
+  .strip.top .mark{color:var(--brass);margin-right:12px;font-size:16px;letter-spacing:0}
+  .strip.bottom{bottom:0;justify-content:center;background:var(--strip);
+    color:var(--bone-45);font-size:17px;letter-spacing:.3em}
+  .strip.bottom b{font-weight:400;color:var(--bone-70)}
+
+  /* traços de manchete: canto sup. esq./dir. da arte */
+  .traits{position:absolute;left:48px;right:48px;top:96px;display:flex;
+    justify-content:space-between;align-items:flex-start;gap:24px}
+  .trait{min-width:236px;padding:16px 20px 14px;border:1px solid var(--line);
+    border-radius:3px;background:rgba(8,10,11,.42);
+    -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
+  .trait .label{font-family:var(--sans);font-size:24px;line-height:1;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--brass)}
+  .trait .value{font-family:var(--serif);font-size:76px;line-height:.98;color:var(--bone);
+    margin-top:8px;font-variant-numeric:lining-nums tabular-nums}
+  .trait.right{text-align:right}
+  .trait.right .value{color:var(--bone-70)}
+
+  /* PV / Armadura: canto inf. esq./dir. da arte. As três alturas são fixas
+     (rótulo 0 · nota 36 · valor 190) para os números dos dois lados caírem na
+     mesma linha de base, com ou sem nota. */
+  .vitae{position:absolute;left:48px;right:48px;top:1096px;height:190px;
+    display:flex;justify-content:space-between;gap:24px}
+  .stat{position:relative;width:46%;height:190px}
+  .stat .label{position:absolute;top:0;font-size:22px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--brass)}
+  .stat .note{position:absolute;top:36px;font-size:20px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--bone-70)}
+  .stat .val{position:absolute;bottom:0;width:100%;font-family:var(--serif);
+    font-size:60px;line-height:1;color:var(--bone);
+    font-variant-numeric:lining-nums tabular-nums}
+  .stat .val .of{font-size:34px;color:var(--bone-45)}
+  .stat.armor{text-align:right}
+
+  /* ⅓ inferior: caixa de texto (estilo MTG) */
+  .panel{position:absolute;left:0;right:0;top:1280px;height:584px;padding:56px 48px 0;
+    background:var(--panel);display:flex;flex-direction:column}
+  .card-name{font-family:var(--serif);font-weight:600;font-size:52px;line-height:1.06;
+    letter-spacing:.005em;color:var(--bone)}
+  .card-type{margin-top:10px;font-size:24px;letter-spacing:.12em;text-transform:uppercase;
+    color:rgba(233,224,205,.62)}
+  .rule{margin:22px 0 0;height:1px;background:linear-gradient(to right,
+    rgba(201,150,47,.75),rgba(201,150,47,.18) 70%,rgba(201,150,47,0))}
+  .card-text{margin-top:22px;font-size:28px;line-height:1.42;color:rgba(233,224,205,.84);
+    max-width:41ch}
+  .kw{color:var(--brass);border-bottom:1px dashed rgba(201,150,47,.55);
+    text-decoration:none;cursor:help}
+
+  /* poder: bloco opcional do personagem */
+  .ability{margin-top:auto;margin-bottom:40px;padding:16px 20px;border-left:2px solid var(--brass);
+    background:rgba(201,150,47,.06)}
+  .ability .label{font-size:20px;letter-spacing:.2em;text-transform:uppercase;color:var(--brass)}
+  .ability .name{font-family:var(--serif);font-size:30px;color:var(--bone);margin-top:6px}
+  .ability .nums{margin-top:8px;font-size:22px;letter-spacing:.06em;color:rgba(233,224,205,.62)}
+  .ability .nums b{font-weight:400;color:var(--bone-70);font-variant-numeric:tabular-nums}
+
+  /* legenda de protótipo (fora do card) */
+  .caption{font-size:13px;line-height:1.6;text-align:center;max-width:560px;color:#7a8087}
+  .caption b{color:#c8ccd1;font-weight:500}
+  .caption code{font-size:12px;color:#9aa1a8}
+  body.full .caption{display:none}
+</style>
+</head>
+<body>
+<div class="frame">
+  <article class="wai-card" aria-label="Card de personagem: Aldwyn, escudeiro da Ordem do Altar">
+
+    <!-- arte 9:16 placeholders (img/cards/reino-cinza.webp) -->
+    <div class="art" aria-hidden="true">
+      <svg viewBox="0 0 1080 1280" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#26221f"/>
+            <stop offset="52%" stop-color="#181b1e"/>
+            <stop offset="100%" stop-color="#0e1012"/>
+          </linearGradient>
+          <radialGradient id="glow" cx="50%" cy="42%" r="52%">
+            <stop offset="0" stop-color="#b4562b" stop-opacity=".5"/>
+            <stop offset="55%" stop-color="#8f4326" stop-opacity=".16"/>
+            <stop offset="100%" stop-color="#8f4326" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="steel" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#8e857a"/>
+            <stop offset="28%" stop-color="#ded3bd"/>
+            <stop offset="52%" stop-color="#f2ead8"/>
+            <stop offset="78%" stop-color="#cabda4"/>
+            <stop offset="100%" stop-color="#7d746a"/>
+          </linearGradient>
+          <linearGradient id="grip" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#2a211c"/>
+            <stop offset="50%" stop-color="#4a3a2e"/>
+            <stop offset="100%" stop-color="#251d19"/>
+          </linearGradient>
+          <radialGradient id="vig" cx="50%" cy="46%" r="72%">
+            <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+            <stop offset="100%" stop-color="#000" stop-opacity=".72"/>
+          </radialGradient>
+          <filter id="grain">
+            <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3"/>
+            <feColorMatrix type="saturate" values="0"/>
+            <feComponentTransfer><feFuncA type="linear" slope=".16"/></feComponentTransfer>
+          </filter>
+        </defs>
+
+        <rect width="1080" height="1280" fill="url(#bg)"/>
+        <rect width="1080" height="1280" fill="url(#glow)"/>
+
+        <!-- órbitas do altar -->
+        <g fill="none" stroke="#e9e0cd" stroke-opacity=".13">
+          <circle cx="540" cy="470" r="212"/>
+          <circle cx="540" cy="470" r="312" stroke-dasharray="2 14"/>
+          <circle cx="540" cy="470" r="412" stroke-opacity=".07"/>
+        </g>
+        <g fill="#c9962f" fill-opacity=".55">
+          <circle cx="540" cy="58" r="5"/><circle cx="540" cy="882" r="4"/>
+          <circle cx="128" cy="470" r="4"/><circle cx="952" cy="470" r="4"/>
+        </g>
+
+        <!-- lâmina do juízo -->
+        <g>
+          <ellipse cx="540" cy="640" rx="160" ry="440" fill="#c9962f" opacity=".06"/>
+          <path d="M540 196 L588 438 L578 828 L556 940 L524 940 L502 828 L492 438 Z" fill="url(#steel)"/>
+          <path d="M540 262 L540 900" stroke="#1b1d1f" stroke-opacity=".34" stroke-width="7"/>
+          <path d="M540 196 L560 430 L552 800" stroke="#fff" stroke-opacity=".28" stroke-width="3"/>
+          <rect x="392" y="928" width="296" height="28" rx="7" fill="#c9962f"/>
+          <rect x="392" y="928" width="296" height="9" rx="4" fill="#f0cf82" opacity=".5"/>
+          <rect x="516" y="956" width="48" height="176" rx="6" fill="url(#grip)"/>
+          <g stroke="#0f0c0a" stroke-opacity=".55" stroke-width="3">
+            <path d="M518 984 H562"/><path d="M518 1014 H562"/><path d="M518 1044 H562"/>
+            <path d="M518 1074 H562"/><path d="M518 1104 H562"/>
+          </g>
+          <circle cx="540" cy="1160" r="30" fill="#c9962f"/>
+          <circle cx="540" cy="1160" r="30" fill="none" stroke="#f0cf82" stroke-opacity=".5" stroke-width="2"/>
+          <circle cx="540" cy="1160" r="10" fill="#14171a" fill-opacity=".7"/>
+        </g>
+
+        <!-- poeira -->
+        <g fill="#e9e0cd">
+          <circle cx="238" cy="288" r="3" opacity=".28"/><circle cx="816" cy="352" r="4" opacity=".22"/>
+          <circle cx="900" cy="742" r="3" opacity=".2"/><circle cx="182" cy="806" r="4" opacity=".18"/>
+          <circle cx="700" cy="176" r="2.5" opacity=".3"/><circle cx="330" cy="1010" r="3" opacity=".16"/>
+        </g>
+
+        <rect width="1080" height="1280" fill="url(#vig)"/>
+        <rect width="1080" height="1280" filter="url(#grain)" opacity=".5"/>
+      </svg>
+    </div>
+    <div class="veil-top"></div>
+    <div class="veil-bottom"></div>
+
+    <!-- faixa fina superior -->
+    <div class="strip top"><span class="mark">✦</span>Reino Cinza</div>
+
+    <!-- traços de manchete (skin.headlineTraits) -->
+    <div class="traits">
+      <div class="trait left"><div class="label">Lâmina</div><div class="value">3</div></div>
+      <div class="trait right"><div class="label">Sombra</div><div class="value">2</div></div>
+    </div>
+
+    <!-- PV e Armadura, em número -->
+    <div class="vitae">
+      <div class="stat">
+        <div class="label">Vigor</div>
+        <div class="val">6<span class="of">/12</span></div>
+      </div>
+      <div class="stat armor">
+        <div class="label">Armadura</div>
+        <div class="note">Peitoral</div>
+        <div class="val">14</div>
+      </div>
+    </div>
+
+    <!-- ⅓ inferior: caixa de texto -->
+    <div class="panel">
+      <h1 class="card-name">Aldwyn, o Escudeiro</h1>
+      <div class="card-type">Escudeiro · Ordem do Altar</div>
+      <div class="rule"></div>
+      <p class="card-text">
+        Carrega o <a class="kw" title="card de item">Escudo do Altar</a> como quem
+        carrega uma promessa. Nas <a class="kw" title="card de aventura">Ruínas de
+        Vhal</a> aprendeu que a Fé também sangra — e que a Dúvida pesa mais que o aço.
+      </p>
+      <div class="ability">
+        <div class="label">Poder</div>
+        <div class="name">Golpe do Juízo</div>
+        <div class="nums">valor <b>+4</b> · custa <b>3</b> de Vigor</div>
+      </div>
+    </div>
+
+    <!-- faixa fina inferior -->
+    <div class="strip bottom"><b>WAI</b>&nbsp;·&nbsp;Game System</div>
+  </article>
+</div>
+
+<p class="caption">
+  <b>Protótipo §18.7</b> — planta 1080 × 1920, exibido a <code id="scale-note">—</code>.
+  Skin de exemplo <b>Reino Cinza</b> (§14), dados ilustrativos, arte placeholder.
+  <code>?full=1</code> mostra 1:1.
+</p>
+
+<script>
+  // Escala de exibição: min(1, altura/largura disponíveis). ?full=1 desliga.
+  const full = new URLSearchParams(location.search).has('full');
+  const card = document.querySelector('.wai-card');
+  const frame = document.querySelector('.frame');
+  const note = document.getElementById('scale-note');
+  function fit() {
+    if (full) {
+      document.body.classList.add('full');
+      card.style.transform = 'none';
+      frame.style.width = '1080px';
+      frame.style.height = '1920px';
+      return;
+    }
+    const s = Math.min(1, (innerHeight - 150) / 1920, (innerWidth - 48) / 1080);
+    card.style.transform = `scale(${s})`;
+    frame.style.width = `${1080 * s}px`;
+    frame.style.height = `${1920 * s}px`;
+    note.textContent = `${Math.round(s * 100)}% (${Math.round(1080 * s)} × ${Math.round(1920 * s)})`;
+  }
+  addEventListener('resize', fit);
+  fit();
+</script>
+</body>
+</html>

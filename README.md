@@ -7,6 +7,7 @@ lore, nomes, prosa, imagens, paleta — é **skin**, um dado externo que veste o
 motor. O `wai-core` nunca depende de uma skin; cada skin depende dele.
 
 - **Livro de regras:** [`docs/livro-regras-universal.md`](docs/livro-regras-universal.md) ([HTML navegável](docs/index.html))
+- **Card padrão:** [`docs/prototipo/card-personagem.html`](docs/prototipo/card-personagem.html) (render de referência §18.7, arte placeholder)
 - **Skins:** vivem em repositórios próprios e dependem do `wai-core`.
 
 ## Estrutura

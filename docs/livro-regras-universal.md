@@ -448,6 +448,81 @@ desenhar como círculos.
 Nível = **troca da ficha inteira**: `entity.levels[]` guarda, por nível, o
 card completo e seus itens, previamente estabelecido. Sem interpolação.
 
+### 18.7 Render do card padrão de personagem
+
+O card é **um canvas 9:16, desenhado numa base de 1080 × 1920** e escalado por
+`u = largura / 1080`. Toda medida abaixo é em múltiplos dessa base; o tema da
+skin troca cor, fonte e o breakpoint de exibição — **nunca a planta**.
+
+```
+0 ───────────────────────────────────── 0
+   ✦ assinatura da skin            56
+56 ─────────────────────────────────────
+   [Lâmina 3]           [Sombra 2]        ← traços de manchete
+             ilustração (9:16, bleeding)
+   0 → 1280 = ⅔ da altura
+   PV 6/12                Armadura 14    ← cantos inferiores
+1280 ───────────────────────────────────
+   NOME DO PERSONAGEM                 52
+   TIPO · ORIGEM                      24
+   ────────────────────────────────────
+   prosa com [[palavra-chave]]        28
+   ┌ poder: nome · valor · custo ┐  ancorado no pé
+1280 → 1864 = ⅓ da altura
+1864 ───────────────────────────────────
+   ✦ WAI GAME System                  56
+1920 ───────────────────────────────────
+```
+
+| Zona | Topo | Conteúdo | Origem | Medida |
+|---|---|---|---|---|
+| Faixa superior | 0 | assinatura da skin, à esquerda, recuo 40 | `img/brand/<skin>.svg` | faixa 56 · marca 28 |
+| Traço de manchete 1 | 96 | nome em caixa-alta + valor | `entity.traits` via `skin.headlineTraits` | rótulo 24 · valor 76 |
+| Traço de manchete 2 | 96 | idem, alinhado à direita | idem | idem |
+| Ilustração | 0 | arte sangrando nas quatro bordas | `img/cards/<id>.webp` | 1080 × 1280 (⅔) |
+| PV | 1096 | `atual/máx`, número e não bolinha | `entity.pool` | rótulo 22 · número 60 · `/máx` 34 |
+| Armadura | 1096 | `defense` | `entity.defense` | idem |
+| Nome | 1336 | nome do personagem | `entity.name` | 52 |
+| Linha de tipo | 1396 | tipo · origem, versalete | `entity.type` | 24, tracking .12em |
+| Filete | 1438 | 1px | — | — |
+| Prosa | 1462 | até 4 linhas; `[[chave]]` em accent + sublinhado | `entity.desc` | 28 / 1,4 |
+| Poder | pé do painel | nome, `value` e `cost`, 40 acima da faixa inferior | `entity.ability` | 20 / 30 / 22 |
+| Faixa inferior | 1864 | assinatura WAI, centralizada | `img/brand/wai.svg` (global) | faixa 56 · marca 26 |
+
+**Decidido — recuos e scrims:** recuo lateral de **48** em todas as zonas e
+painel de texto com 56 de respiro superior. Duas véus de legibilidade, porque a
+arte é imprevisível: gradiente de 55% no topo (0 → 240) sob a assinatura e os
+traços, e gradiente de 70% na base da ilustração (1040 → 1280) sob PV e
+Armadura. Nenhum texto do card encosta em arte crua.
+
+**Decidido — ⅔ e ⅓:** a proporção vale para as **faixas de conteúdo**, não para
+o arquivo: ilustração de 1280 mais painel de 584 e faixa de 56 fecham os 1920.
+As faixas finas **sobrepõem** a arte em vez de empilhar, para o card não perder
+altura de ilustração.
+
+**Decidido — o que o card de personagem não mostra:** `credit` (§11 é dinheiro,
+fora do card), a lista de itens e o `state` — itens e poderes só aparecem como
+**card vinculado** por `[[palavra-chave]]`. Selo de estado, quando a skin
+quiser, é badge de canto (§18.5), não zona da planta.
+
+| Contexto | Card | Uso |
+|---|---|---|
+| Celular, 1ª dobra | `min(92vw, 420px)` — típico **360 × 640** | card único |
+| Celular, vinculado | **280 × 498** | abre em `<dialog>` sobre a origem |
+| Tablet / desktop | **300 × 533** | fileira lado a lado (§18.3) |
+| Arte | **1080 × 1920** | `.webp`, nítido a 3× de 360 |
+
+**Decidido — escala de leitura:** entre 280 e 420 px o card é **objeto visual**,
+como carta impressa: a prosa cai para 8–11 px e não foi feita para ser lida aí.
+O que precisa ser lido à distância — nome, traços, PV, armadura — fica entre 60
+e 76 px na base (17–25 px na tela). Prosa se lê no card ampliado (≥ 540 px) ou no
+`<dialog>`, nunca na fileira de 300 px.
+
+**Decidido — validação:** o render de referência vive em
+[`docs/prototipo/card-personagem.html`](prototipo/card-personagem.html), veste a
+skin de exemplo "Reino Cinza" (§14) e usa arte **placeholder**. Ele existe para
+conferir a planta, não é código do motor nem asset de skin.
+
 ---
 
 ## Apêndice — Glossário neutro
