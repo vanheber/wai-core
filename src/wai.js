@@ -172,18 +172,20 @@ export function rollDamage(item = null, { critical = false, rng = Math.random } 
 }
 
 // Ataque: duelo contra a CA do alvo. Sucesso aplica o dano ao pool do alvo;
-// crítico = dano máximo (§10).
+// crítico = dano máximo (§10). Alvo é obrigatório — sem ele não há CA, e uma
+// DC inventada faria o ataque suceder contra o vazio (§5: DC nunca é padrão).
 export function attack({
   attacker = null, defender = null, item = null, trait = null,
   mode = 'normal', useAbility = false, rng = Math.random,
 } = {}) {
+  if (!defender) throw new Error('attack: defender é obrigatório');
   const result = rollDuel({
-    entity: attacker, trait, dc: defender?.defense ?? 0, mode, useAbility, rng,
+    entity: attacker, trait, dc: defender.defense ?? 0, mode, useAbility, rng,
   });
   let damage = 0;
   if (result.success && item) {
     damage = rollDamage(item, { critical: result.band === BAND.CRITICAL, rng });
-    if (defender) addPool(defender, -damage);
+    addPool(defender, -damage);
   }
   return { ...result, damage };
 }

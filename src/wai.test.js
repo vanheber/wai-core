@@ -175,6 +175,20 @@ test('attack: acerta pela CA e aplica dano; crítico = dano máximo', () => {
   assert.equal(def3.state, STATE.DOWN);
 });
 
+test('attack exige alvo: sem defensor não há CA (nem DC padrão)', () => {
+  const atk = createEntity({ traits: { attack: 3 } });
+  const sword = { name: 'lâmina', dice: '2d6' };
+  assert.throws(() => attack({ attacker: atk, item: sword, trait: 'attack' }),
+    /defender é obrigatório/);
+
+  // alvo sem proteção declarada tem CA 0 (§10.1), não erro
+  const naked = { id: 'alvo', pool: { start: 4, max: 8, current: 4 }, state: STATE.ACTIVE };
+  const hit = attack({ attacker: atk, defender: naked, item: { name: 'adaga', damage: 2 }, trait: 'attack', rng: rig([[12, 9], [12, 2]]) });
+  assert.equal(hit.success, true);
+  assert.equal(hit.damage, 2);
+  assert.equal(naked.pool.current, 2);
+});
+
 test('moeda: denominações fixas e breakdown greedy', () => {
   assert.deepEqual(DENOMINATIONS, [1, 10, 50, 100, 1000, 5000, 10000]);
   const b = breakdown(11601);

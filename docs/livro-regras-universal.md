@@ -223,6 +223,10 @@ Um ataque é um duelo (§3) cuja **DC é a `defense` do alvo**:
 `defense` é a **CA**: armadura, escudo, campo de força — o que a skin definir.
 Um alvo sem proteção tem `defense = 0`.
 
+**Decidido — alvo obrigatório:** ataque sem alvo é erro do motor, não teste
+contra dificuldade zero. A DC do ataque *é* a CA do alvo (§5: DC nunca tem
+padrão); sem alvo não existe CA para oferecer.
+
 ### 10.2 Dano
 
 - `item.dice` (ex.: `2d6`) → rolagem normal.
@@ -479,7 +483,8 @@ card completo e seus itens, previamente estabelecido. Sem interpolação.
   recurso, recupera por desfecho favorável, piso 0 · §8 `down`/`replaced`
   redefinidos, substituto é outra entidade · §9 itens modificam traços e
   carregam dano · §10 crítico = dano máximo, poder gasta pool, Medo do GM
-  reportado e não rastreado · §11 crédito separado do pool, acumulativo ·
+  reportado e não rastreado, ataque sem alvo é erro · §11 crédito separado do
+  pool, acumulativo ·
   §12 Básico = §1–§11, opcionais = Progressão/Facções · §15 `skin.json`.
 
 Nenhum ponto em aberto no módulo básico.
