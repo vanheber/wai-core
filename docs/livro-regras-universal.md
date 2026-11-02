@@ -571,7 +571,14 @@ de mestre desligados; `em-breve` é anúncio.
 **Decidido — validação antes do build.** Um validador recusa, com caminho
 exato: arquivo ausente, `slug`/`id` divergente da pasta, caminho absoluto, `id`
 repetido, `powerRef`/`itemRefs` que não resolvem, `headlineTraits` fora de
-`traits`, imagem fantasma e skin `pronta` sem `dc`/roster.
+`traits`, imagem fantasma, skin `pronta` sem `dc`/roster, módulo sem arquivo ou
+com `id` divergente, e lore com `parent`, arquivo ou imagem que não resolvem.
+
+**Decidido — a missão tem duas leituras.** O `record` é o diário daquela mesa;
+o `module` é o roteiro reutilizável (sinopse, contexto, atos, locais, elenco,
+ameaças, recompensas e ganchos), publicado em página própria. O mundo já escrito
+vive em `data/lore/` e ganha uma biblioteca navegável por aventura. Nenhum dos
+dois é regra de jogo: são consulta e condução.
 
 **Decidido — arte provisória é marcada.** Enquanto a arte final não existe, o
 gerador produz SVGs procedurais (capa 2:3, hero 16:9, card 9:16) com a marca
