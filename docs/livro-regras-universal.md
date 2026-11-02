@@ -525,6 +525,71 @@ conferir a planta, não é código do motor nem asset de skin.
 
 ---
 
+## 19. O portal — a biblioteca de aventuras
+
+O motor é regra, a sala é estado, a skin é dado. Falta o lugar onde as skins
+**se encontram**: a biblioteca. Ela vive no repositório `wai-aventuras` e é a
+quarta camada do sistema.
+
+| Camada | Repositório | É | Não é |
+|---|---|---|---|
+| Regra | `wai-core` | duelo, faixas, pool, dano, crédito | sala, UI, arte |
+| Sala | `wai-table` | assentos, pool vivo, medo, log, pedidos | regra, transporte, skin |
+| Portal | `wai-aventuras` | vitrine, página da aventura, sala, skins | regra, geração |
+| Forja | `wai-forge` | gerar aventuras, personagens e mapas | jogar, servir páginas |
+
+**Decidido — aventura é pasta, não página.** Uma aventura é um diretório com
+`aventura.json` (catálogo da vitrine), `skin.json` (manifesto do §15),
+`theme.css` (tokens do §18.5), `data/` (roster, itens, poderes, missões) e
+`img/`. A mesma UI desenha todas as aventuras; nenhuma tem HTML próprio.
+
+```json
+// aventura.json — o que a vitrine mostra
+{
+  "slug": "spaceships-and-aliens",
+  "title": "Spaceships and Aliens",
+  "tagline": "A Aegis Tiburon corta o vácuo. Alguém tem que descer.",
+  "synopsis": "…",
+  "status": "pronta",
+  "featured": true,
+  "order": 1,
+  "tags": ["sci-fi", "espaço"],
+  "players": "2–6",
+  "duration": "1–2 h por sessão",
+  "cover": "img/cover.svg",
+  "hero": "img/hero.svg",
+  "brand": "img/brand/spaceships-and-aliens.svg",
+  "palette": { "accent": "#409eff", "secondary": "#a78bfa", "bg": "#0b0f14" }
+}
+```
+
+**Decidido — `status` é portão, não enfeite.** `pronta` exige `skin.dc`, roster
+não vazio e `name`/`desc` em cada entidade; `estrutura` é pasta de marcação
+(manifesto, tema e dados vazios) que o portal já sabe desenhar, mas com os CTAs
+de mestre desligados; `em-breve` é anúncio.
+
+**Decidido — validação antes do build.** Um validador recusa, com caminho
+exato: arquivo ausente, `slug`/`id` divergente da pasta, caminho absoluto, `id`
+repetido, `powerRef`/`itemRefs` que não resolvem, `headlineTraits` fora de
+`traits`, imagem fantasma e skin `pronta` sem `dc`/roster.
+
+**Decidido — arte provisória é marcada.** Enquanto a arte final não existe, o
+gerador produz SVGs procedurais (capa 2:3, hero 16:9, card 9:16) com a marca
+visível `PLACEHOLDER · <id> · <proporção>` e a paleta do catálogo. Nenhum asset
+de terceiros entra na biblioteca.
+
+**Decidido — o convite é do portal, não do motor.** A sala recebe transporte
+injetado (`{send, onMessage}`) e papel explícito: o mestre é `host` (manda
+snapshot, aplica pedidos e rolagens) e o jogador é `client` (recebe snapshot,
+propõe). O WebRTC com SDP manual mora no portal, não no `wai-table`. `claim` —
+quem senta em qual personagem — também é política do portal.
+
+O contrato completo, campo a campo, e as decisões de implementação vivem em
+[`wai-aventuras/docs/portal.md`](../../wai-aventuras/docs/portal.md) e
+[`wai-aventuras/docs/decisoes.md`](../../wai-aventuras/docs/decisoes.md).
+
+---
+
 ## Apêndice — Glossário neutro
 
 | Termo do motor | Significado |
@@ -560,6 +625,8 @@ conferir a planta, não é código do motor nem asset de skin.
   carregam dano · §10 crítico = dano máximo, poder gasta pool, Medo do GM
   reportado e não rastreado, ataque sem alvo é erro · §11 crédito separado do
   pool, acumulativo ·
-  §12 Básico = §1–§11, opcionais = Progressão/Facções · §15 `skin.json`.
+  §12 Básico = §1–§11, opcionais = Progressão/Facções · §15 `skin.json` ·
+  §19 aventura = pasta (`aventura.json` + `skin.json` + `data/` + `img/`),
+  validada antes do build.
 
 Nenhum ponto em aberto no módulo básico.
