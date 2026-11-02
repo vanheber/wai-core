@@ -536,7 +536,7 @@ quarta camada do sistema.
 | Regra | `wai-core` | duelo, faixas, pool, dano, crédito | sala, UI, arte |
 | Sala | `wai-table` | assentos, pool vivo, medo, log, pedidos | regra, transporte, skin |
 | Portal | `wai-aventuras` | vitrine, página da aventura, sala, skins | regra, geração |
-| Forja | `wai-forge` | gerar aventuras, personagens e mapas | jogar, servir páginas |
+| Forja | `wai-forge` | sortear missões, planetas e encontros **do S&A** | jogar, servir páginas, ser genérica |
 
 **Decidido — aventura é pasta, não página.** Uma aventura é um diretório com
 `aventura.json` (catálogo da vitrine), `skin.json` (manifesto do §15),
